@@ -8,7 +8,7 @@ from keras.layers.recurrent import LSTM
 from keras.models import Sequential
 
 os.environ['IF_CPP_MIN_LOG_LEVEL'] = '3'
-warnings.fileterwarnings("ignore")
+warnings.filterwarnings("ignore")
 
 def load_data(filename, seq_len, normalise_window):
     f = open(filename, "rb").read()
@@ -28,7 +28,7 @@ def load_data(filename, seq_len, normalise_window):
     train = result[:int(row), :]
     np.random.shuffle(train)
     x_train = train[:, :-1]
-    y_train = trian[:, -1]
+    y_train = train[:, -1]
     x_test = result[int(row):, :-1]
     y_test = result[int(row):, -1]
 
@@ -47,7 +47,7 @@ def normalise_windows(window_data):
 def build_model(layers):
     model = Sequential()
 
-    model.add(LSTM(input_shape = (layers[1], layers[0])
+    model.add(LSTM(input_shape = (layers[1], layers[0]),
                     output_dim=layers[1],
                     return_sequences=True))
     model.add(Dropout(0.2))
@@ -79,11 +79,11 @@ def predict_sequence_full(model, data, window_size):
 
 def predict_sequences_multiple(model, data, window_size, prediction_len):
     prediction_seqs = []
-    for i in range(len(data)/prediction_len):
+    for i in range(int(len(data)/prediction_len)):
         curr_frame = data[i*prediction_len]
         predicted = []
         for j in range(prediction_len):
-            predicted.append(model.predict(curr_frame[newaxis,:,:][0,0]))
+            predicted.append(model.predict(curr_frame[newaxis,:,:])[0,0])
             curr_frame = curr_frame[1:]
             curr_frame = np.insert(curr_frame, [window_size-1], predicted[-1], axis=0)
         prediction_seqs.append(predicted)
